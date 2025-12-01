@@ -14,7 +14,7 @@ from shiny import App, ui, reactive, render
 import shinyswatch
 from shinywidgets import output_widget, render_widget
 
-import folium
+#import folium
 
 # adjust directory as necessary
 fpath = "C:/Users/georg/Dropbox/~python_working/aus_isotopes/shiny_app/APIC_shiny_app/"
@@ -83,7 +83,7 @@ d_son = d_son.rename({'year': 'time'})
 years_cal = d2H_ann.time.dt.year.values
 new_time_mam = [pd.Timestamp(year=year, month=5, day=31) for year in years_cal]
 new_time_jja = [pd.Timestamp(year=year, month=8, day=31) for year in years_cal]
-new_time_son = [pd.Timestamp(year=year, month=5, day=30) for year in years_cal]
+new_time_son = [pd.Timestamp(year=year, month=11, day=30) for year in years_cal]
 
 H_mam = H_mam.assign_coords(time=("time", new_time_mam))
 O_mam = O_mam.assign_coords(time=("time", new_time_mam))
@@ -91,7 +91,7 @@ d_mam = d_mam.assign_coords(time=("time", new_time_mam))
 H_jja = H_jja.assign_coords(time=("time", new_time_jja))
 O_jja = O_jja.assign_coords(time=("time", new_time_jja))
 d_jja = d_jja.assign_coords(time=("time", new_time_jja))
-H_son = H_son.assign_coords(time=("time", new_time_mam))
+H_son = H_son.assign_coords(time=("time", new_time_son))
 O_son = O_son.assign_coords(time=("time", new_time_son))
 d_son = d_son.assign_coords(time=("time", new_time_son))
 
@@ -320,7 +320,7 @@ app_ui = ui.page_fluid(
                         ui.tags.h3("Download netcdf files", style="font-weight: bold; font-size: 20px;")
                         ),
                     ui.markdown(
-                        """<a href="https://zenodo.org/records/15486278" target="_blank">This Zenodo repository</a> holds netcdf files 
+                        """<a href="https://doi.org/10.5281/zenodo.15486277" target="_blank">This Zenodo repository</a> holds netcdf files 
                         with monthly precipitation isotope data across the Australian continent, at 0.25° spatial resolution. 
                         The data are available at monthly and annual temporal resolution.
                 """
@@ -454,7 +454,7 @@ app_ui = ui.page_fluid(
                         ui.tags.h3("Download netcdf files", style="font-weight: bold; font-size: 20px;")
                         ),
                     ui.markdown(
-                        """<a href="https://zenodo.org/records/10951789" target="_blank">This Zenodo repository</a> holds netcdf files 
+                        """<a href="https://doi.org/10.5281/zenodo.15486277" target="_blank">This Zenodo repository</a> holds netcdf files 
                         with monthly precipitation isotope data across the Australian continent, at 0.25° spatial resolution. 
                         The data are available at monthly and annual temporal resolution.
                 """
@@ -505,6 +505,25 @@ def server(input, output, session):
     def show_modal_on_load():
         ui.modal_show(modal_ts)
     
+    # helper function to check lats/lons
+    def is_valid_point(ds, lat, lon):
+        try:
+            da = ds.sel(lat=lat, lon=lon, method="nearest")
+        except Exception:
+            return False
+
+        return not np.all(np.isnan(da.to_array()))
+    # and one to show a modal
+    def show_error_modal(message):
+        ui.modal_show(
+            ui.modal(
+                ui.h4("Invalid lat/lon. Please check your coordinates."),
+                ui.p(message),
+                easy_close=True,
+                footer=ui.input_action_button("dismiss_error", "OK")
+            )
+        )
+
     # TIMESERIES: function to get data at selected point
     def extract_timeseries(lat, lon):
         # extract relevant timeseries
@@ -605,6 +624,13 @@ def server(input, output, session):
     def selected_location_data():
         lat = input.lat()
         lon = input.lon()
+
+        # check ther lat/lon choice is valid
+        ds_check = d18O_ann
+        if not is_valid_point(ds_check, lat, lon):
+            ui.notification_show(f"Lat/lon ({lat}, {lon}) is outside the grid area. Please check your coordinates and try again",type="error",duration=None)
+            return pd.DataFrame()
+
         data = extract_timeseries(lat, lon)
 
         if input.date_range():
@@ -624,6 +650,7 @@ def server(input, output, session):
     @reactive.event(input.run_calcs)
     def plot_ts():
         data = selected_location_data()
+        
         time_ax = "year" if input.time_res() in ["ann", "ann_trop", "DJF", "MAM", "JJA", "SON"] else "date"
         time_ax_title = "Year" if input.time_res() in ["ann", "ann_trop", "DJF", "MAM", "JJA", "SON"] else "Date"
 
@@ -812,7 +839,7 @@ def server(input, output, session):
         return filename
     
     # SPATIAL SEARCH: a function to select the appropriate dataset
-    @reactive.Effect
+
     @reactive.calc
     def get_chosen_system():
         if input.isotope() == "d2H":

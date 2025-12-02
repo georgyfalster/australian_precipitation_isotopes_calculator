@@ -136,14 +136,13 @@ app_ui = ui.page_fluid(
              <br><br>Below are two tabs for different data extraction types: timeseries or location search. On the `Extract timeseries` page you can enter a location (latitude and
              longitude), choose a temporal resolution and optional date range, then view the precipitation isotope δ²H, δ¹⁸O, and <i>dxs</i> values for your chosen location. 
              You will have the option to download the data to csv. On the 'Spatial search' page, you 
-             can enter a δ²H, δ¹⁸O, or <i>dxs</i> value as well as an optional expected offest from precipitation δ²H/δ¹⁸O/<i>dxs</i> ('fractionation') and time period of interest. 
+             can enter a δ²H, δ¹⁸O, or <i>dxs</i> value as well as an optional expected offest from precipitation δ²H/δ¹⁸O/<i>dxs</i> and time period of interest. 
              You will then see a map of locations where that sample could have come from. 
-             <br><br>When choosing a tab, an information window will appear with further important details. To make the information window reappear, click the relevant tab (you won't 
-             lose your data). 
+             <br><br>When choosing a tab, an information window will appear with further important details. To make the information window reappear, click the relevant tab. 
              <br><br>If using data from this online calculator, please cite 
              the <a href="https://egusphere.copernicus.org/preprints/2025/egusphere-2025-2458/" target="_blank">original publication</a>. Please also see the 
              publication for all details of how the precipitation isotope values were calculated. It is important to note 
-             that these are modelled values, not primary observations.  
+             that these are modelled values, not primary observations. If you encounter problems with this web app, please get in touch with Georgy Falster.  
             """
             
         ), class_="custom-text"

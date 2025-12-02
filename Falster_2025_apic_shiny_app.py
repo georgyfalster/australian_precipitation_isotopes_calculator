@@ -14,10 +14,11 @@ from shiny import App, ui, reactive, render
 import shinyswatch
 from shinywidgets import output_widget, render_widget
 
-#import folium
+import folium
 
 # adjust directory as necessary
-fpath = "C:/Users/georg/Dropbox/~python_working/aus_isotopes/shiny_app/APIC_shiny_app/"
+fpath = ""
+#fpath = "C:/Users/georg/Dropbox/~python_working/aus_isotopes/shiny_app/APIC_shiny_app/"
 
 # monthly data
 d2H = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_196201-202312_monthly_median.nc")
@@ -29,92 +30,7 @@ d2H_ann = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2023_ann_median.
 d18O_ann = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2023_ann_median.nc")
 dxs_ann = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2023_ann_median.nc")
 
-# annual (Jul-Jun)
-H_ann_trop = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2022_ann-trop.nc")
-O_ann_trop = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2022_ann-trop.nc")
-d_ann_trop = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2022_ann-trop.nc")
-
-# annual (DJF)
-H_djf = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2022_ann-djf.nc")
-O_djf = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2022_ann-djf.nc")
-d_djf = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2022_ann-djf.nc")
-
-# annual (MAM)
-H_mam = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2023_ann-mam.nc")
-O_mam = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2023_ann-mam.nc")
-d_mam = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2023_ann-mam.nc")
-
-# annual (JJA)
-H_jja = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2023_ann-jja.nc")
-O_jja = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2023_ann-jja.nc")
-d_jja = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2023_ann-jja.nc")
-
-# annual (SON)
-H_son = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2023_ann-son.nc")
-O_son = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2023_ann-son.nc")
-d_son = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2023_ann-son.nc")
-
-# three-month running mean
-H_3m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2023_3-month-running-mean.nc")
-O_3m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2023_3-month-running-mean.nc")
-d_3m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2023_3-month-running-mean.nc")
-
-# six-month running mean
-H_6m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2023_6-month-running-mean.nc")
-O_6m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2023_6-month-running-mean.nc")
-d_6m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2023_6-month-running-mean.nc")
-
-# twelve-month running mean
-H_12m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2023_12-month-running-mean.nc")
-O_12m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2023_12-month-running-mean.nc")
-d_12m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2023_12-month-running-mean.nc")
-
-# sort out time axes where necessary
-H_mam = H_mam.rename({'year': 'time'})
-O_mam = O_mam.rename({'year': 'time'})
-d_mam = d_mam.rename({'year': 'time'})
-H_jja = H_jja.rename({'year': 'time'})
-O_jja = O_jja.rename({'year': 'time'})
-d_jja = d_jja.rename({'year': 'time'})
-H_son = H_son.rename({'year': 'time'})
-O_son = O_son.rename({'year': 'time'})
-d_son = d_son.rename({'year': 'time'})
-
 years_cal = d2H_ann.time.dt.year.values
-new_time_mam = [pd.Timestamp(year=year, month=5, day=31) for year in years_cal]
-new_time_jja = [pd.Timestamp(year=year, month=8, day=31) for year in years_cal]
-new_time_son = [pd.Timestamp(year=year, month=11, day=30) for year in years_cal]
-
-H_mam = H_mam.assign_coords(time=("time", new_time_mam))
-O_mam = O_mam.assign_coords(time=("time", new_time_mam))
-d_mam = d_mam.assign_coords(time=("time", new_time_mam))
-H_jja = H_jja.assign_coords(time=("time", new_time_jja))
-O_jja = O_jja.assign_coords(time=("time", new_time_jja))
-d_jja = d_jja.assign_coords(time=("time", new_time_jja))
-H_son = H_son.assign_coords(time=("time", new_time_son))
-O_son = O_son.assign_coords(time=("time", new_time_son))
-d_son = d_son.assign_coords(time=("time", new_time_son))
-
-# and time axes for 'years' spanning two calendar years
-H_ann_trop = H_ann_trop.rename({'year': 'time'})
-O_ann_trop = O_ann_trop.rename({'year': 'time'})
-d_ann_trop = d_ann_trop.rename({'year': 'time'})
-H_djf = H_djf.rename({'year': 'time'})
-O_djf = O_djf.rename({'year': 'time'})
-d_djf = d_djf.rename({'year': 'time'})
-
-new_time_trop = [pd.Timestamp(year=year, month=7, day=1) for year in years_cal]
-new_time_djf = [pd.Timestamp(year=year, month=12, day=1) for year in years_cal]
-
-new_time_trop = new_time_trop[:-1]
-new_time_djf = new_time_djf[:-1]
-
-H_ann_trop = H_ann_trop.assign_coords(time=("time", new_time_trop))
-O_ann_trop = O_ann_trop.assign_coords(time=("time", new_time_trop))
-d_ann_trop = d_ann_trop.assign_coords(time=("time", new_time_trop))
-H_djf = H_djf.assign_coords(time=("time", new_time_djf))
-O_djf = O_djf.assign_coords(time=("time", new_time_djf))
-d_djf = d_djf.assign_coords(time=("time", new_time_djf))
 
 # we'll also need the precipitation amount data for if users want to specific time periods
 prec = xr.open_dataset(f"{fpath}netcdfs/prec/aus_prec_v1_195901-202312_monthly_1.nc")
@@ -528,6 +444,12 @@ def server(input, output, session):
     def extract_timeseries(lat, lon):
         # extract relevant timeseries
         if input.time_res() == "ann":
+
+            # annual data (Jan-Dec)
+            d2H_ann = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2023_ann_median.nc")
+            d18O_ann = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2023_ann_median.nc")
+            dxs_ann = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2023_ann_median.nc")
+
             site_name = input.site_name() if input.site_name() else "site"
             site_name = site_name.replace(" ", "_")
             d2H_vals = d2H_ann.sel(lat=lat, lon=lon, method="nearest").d2Hp.values
@@ -537,6 +459,24 @@ def server(input, output, session):
 
             return pd.DataFrame({'site': site_name, 'year': time, 'lat': lat, 'lon': lon, 'd2H': d2H_vals, 'd18O': d18O_vals, 'dxs': dxs_vals})
         elif input.time_res() == "ann_trop":
+
+            # annual (Jul-Jun)
+            H_ann_trop = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2022_ann-trop.nc")
+            O_ann_trop = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2022_ann-trop.nc")
+            d_ann_trop = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2022_ann-trop.nc")
+
+            H_ann_trop = H_ann_trop.rename({'year': 'time'})
+            O_ann_trop = O_ann_trop.rename({'year': 'time'})
+            d_ann_trop = d_ann_trop.rename({'year': 'time'})
+
+            new_time_trop = [pd.Timestamp(year=year, month=7, day=1) for year in years_cal]
+            new_time_trop = new_time_trop[:-1]
+
+            
+            H_ann_trop = H_ann_trop.assign_coords(time=("time", new_time_trop))
+            O_ann_trop = O_ann_trop.assign_coords(time=("time", new_time_trop))
+            d_ann_trop = d_ann_trop.assign_coords(time=("time", new_time_trop))
+
             site_name = input.site_name() if input.site_name() else "site"
             site_name = site_name.replace(" ", "_")
             d2H_vals = H_ann_trop.sel(lat=lat, lon=lon, method="nearest").d2Hp.values
@@ -546,6 +486,23 @@ def server(input, output, session):
 
             return pd.DataFrame({'site': site_name, 'year': time, 'lat': lat, 'lon': lon, 'd2H': d2H_vals, 'd18O': d18O_vals, 'dxs': dxs_vals})
         elif input.time_res() == "DJF":
+
+            # annual (DJF)
+            H_djf = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2022_ann-djf.nc")
+            O_djf = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2022_ann-djf.nc")
+            d_djf = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2022_ann-djf.nc")
+     
+            H_djf = H_djf.rename({'year': 'time'})
+            O_djf = O_djf.rename({'year': 'time'})
+            d_djf = d_djf.rename({'year': 'time'})
+
+            new_time_djf = [pd.Timestamp(year=year, month=12, day=1) for year in years_cal]
+            new_time_djf = new_time_djf[:-1]
+
+            H_djf = H_djf.assign_coords(time=("time", new_time_djf))
+            O_djf = O_djf.assign_coords(time=("time", new_time_djf))
+            d_djf = d_djf.assign_coords(time=("time", new_time_djf))
+
             site_name = input.site_name() if input.site_name() else "site"
             site_name = site_name.replace(" ", "_")
             d2H_vals = H_djf.sel(lat=lat, lon=lon, method="nearest").d2Hp.values
@@ -555,6 +512,23 @@ def server(input, output, session):
 
             return pd.DataFrame({'site': site_name, 'year': time, 'lat': lat, 'lon': lon, 'd2H': d2H_vals, 'd18O': d18O_vals, 'dxs': dxs_vals})
         elif input.time_res() == "MAM":
+
+            # annual (MAM)
+            H_mam = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2023_ann-mam.nc")
+            O_mam = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2023_ann-mam.nc")
+            d_mam = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2023_ann-mam.nc")
+            
+            H_mam = H_mam.rename({'year': 'time'})
+            O_mam = O_mam.rename({'year': 'time'})
+            d_mam = d_mam.rename({'year': 'time'})
+
+            new_time_mam = [pd.Timestamp(year=year, month=5, day=31) for year in years_cal]
+
+            
+            H_mam = H_mam.assign_coords(time=("time", new_time_mam))
+            O_mam = O_mam.assign_coords(time=("time", new_time_mam))
+            d_mam = d_mam.assign_coords(time=("time", new_time_mam))
+
             site_name = input.site_name() if input.site_name() else "site"
             site_name = site_name.replace(" ", "_")
             d2H_vals = H_mam.sel(lat=lat, lon=lon, method="nearest").d2Hp.values
@@ -564,6 +538,22 @@ def server(input, output, session):
 
             return pd.DataFrame({'site': site_name, 'year': time, 'lat': lat, 'lon': lon, 'd2H': d2H_vals, 'd18O': d18O_vals, 'dxs': dxs_vals})
         elif input.time_res() == "JJA":
+
+            # annual (JJA)
+            H_jja = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2023_ann-jja.nc")
+            O_jja = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2023_ann-jja.nc")
+            d_jja = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2023_ann-jja.nc")
+
+            new_time_jja = [pd.Timestamp(year=year, month=8, day=31) for year in years_cal]
+
+            H_jja = H_jja.rename({'year': 'time'})
+            O_jja = O_jja.rename({'year': 'time'})
+            d_jja = d_jja.rename({'year': 'time'})
+
+            H_jja = H_jja.assign_coords(time=("time", new_time_jja))
+            O_jja = O_jja.assign_coords(time=("time", new_time_jja))
+            d_jja = d_jja.assign_coords(time=("time", new_time_jja))
+
             site_name = input.site_name() if input.site_name() else "site"
             site_name = site_name.replace(" ", "_")
             d2H_vals = H_jja.sel(lat=lat, lon=lon, method="nearest").d2Hp.values
@@ -573,6 +563,22 @@ def server(input, output, session):
 
             return pd.DataFrame({'site': site_name, 'year': time, 'lat': lat, 'lon': lon, 'd2H': d2H_vals, 'd18O': d18O_vals, 'dxs': dxs_vals})
         elif input.time_res() == "SON":
+
+            # annual (SON)
+            H_son = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2023_ann-son.nc")
+            O_son = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2023_ann-son.nc")
+            d_son = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2023_ann-son.nc")
+
+            H_son = H_son.rename({'year': 'time'})
+            O_son = O_son.rename({'year': 'time'})
+            d_son = d_son.rename({'year': 'time'})  
+
+            new_time_son = [pd.Timestamp(year=year, month=11, day=30) for year in years_cal]
+
+            H_son = H_son.assign_coords(time=("time", new_time_son))
+            O_son = O_son.assign_coords(time=("time", new_time_son))
+            d_son = d_son.assign_coords(time=("time", new_time_son))
+
             site_name = input.site_name() if input.site_name() else "site"
             site_name = site_name.replace(" ", "_")
             d2H_vals = H_son.sel(lat=lat, lon=lon, method="nearest").d2Hp.values
@@ -582,6 +588,12 @@ def server(input, output, session):
 
             return pd.DataFrame({'site': site_name, 'year': time, 'lat': lat, 'lon': lon, 'd2H': d2H_vals, 'd18O': d18O_vals, 'dxs': dxs_vals})
         elif input.time_res() == "3mrm":
+
+            # three-month running mean
+            H_3m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2023_3-month-running-mean.nc")
+            O_3m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2023_3-month-running-mean.nc")
+            d_3m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2023_3-month-running-mean.nc")
+
             site_name = input.site_name() if input.site_name() else "site"
             site_name = site_name.replace(" ", "_")
             d2H_vals = H_3m.sel(lat=lat, lon=lon, method="nearest").d2Hp.values
@@ -591,6 +603,12 @@ def server(input, output, session):
 
             return pd.DataFrame({'site': site_name, 'date': time, 'lat': lat, 'lon': lon, 'd2H': d2H_vals, 'd18O': d18O_vals, 'dxs': dxs_vals})
         elif input.time_res() == "6mrm":
+
+            # six-month running mean
+            H_6m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2023_6-month-running-mean.nc")
+            O_6m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2023_6-month-running-mean.nc")
+            d_6m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2023_6-month-running-mean.nc")
+
             site_name = input.site_name() if input.site_name() else "site"
             site_name = site_name.replace(" ", "_")
             d2H_vals = H_6m.sel(lat=lat, lon=lon, method="nearest").d2Hp.values
@@ -600,6 +618,12 @@ def server(input, output, session):
 
             return pd.DataFrame({'site': site_name, 'date': time, 'lat': lat, 'lon': lon, 'd2H': d2H_vals, 'd18O': d18O_vals, 'dxs': dxs_vals})
         elif input.time_res() == "12mrm":
+
+            # twelve-month running mean
+            H_12m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_1962-2023_12-month-running-mean.nc")
+            O_12m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_1962-2023_12-month-running-mean.nc")
+            d_12m = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_1962-2023_12-month-running-mean.nc")
+
             site_name = input.site_name() if input.site_name() else "site"
             site_name = site_name.replace(" ", "_")
             d2H_vals = H_12m.sel(lat=lat, lon=lon, method="nearest").d2Hp.values
@@ -609,6 +633,12 @@ def server(input, output, session):
 
             return pd.DataFrame({'site': site_name, 'date': time, 'lat': lat, 'lon': lon, 'd2H': d2H_vals, 'd18O': d18O_vals, 'dxs': dxs_vals})
         else:
+
+            # monthly data
+            d2H = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d2H_v1_196201-202312_monthly_median.nc")
+            d18O = xr.open_dataset(f"{fpath}netcdfs/aus_prec.d18O_v1_196201-202312_monthly_median.nc")
+            dxs = xr.open_dataset(f"{fpath}netcdfs/aus_prec.dxs_v1_196201-202312_monthly_median.nc")
+
             site_name = input.site_name() if input.site_name() else "site"
             site_name = site_name.replace(" ", "_")
             d2H_vals = d2H.sel(lat=lat, lon=lon, method="nearest").d2Hp.values
@@ -812,7 +842,7 @@ def server(input, output, session):
             data = selected_location_data() 
 
         if not input.site_name():
-            data['site'] = 'no_sitename_specified'
+            data['site_name'] = 'no_sitename_specified'
 
         for line in metadata:
             yield line + "\n"
@@ -878,7 +908,7 @@ def server(input, output, session):
             return exact_match
         else:
             months, year_start, year_end = get_time_inputs()
-            print("months:", months)
+
 
             dat_red = dat_mth.where(
                 ((dat_mth['time.year'] >= year_start) & (dat_mth['time.year'] <= year_end)) &
@@ -1001,6 +1031,3 @@ def server(input, output, session):
     
 # create the Shiny app
 app = App(app_ui, server)
-
-# test it
-app.run()

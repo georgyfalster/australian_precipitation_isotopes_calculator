@@ -959,19 +959,15 @@ def server(input, output, session):
 
         def get_value_lims(search_type, input_lwr, input_upr):
             if search_type == "Long-term mean":
-                #vmin = math.ceil(input_lwr) # this can skew the colorbar a bit - we want the desired value in the middle
-                #vmax = math.floor(input_upr) 
-                vmin = input_lwr
-                vmax = input_upr 
+                vmin = math.ceil(input_lwr)
+                vmax = math.floor(input_upr)  
                 extend_type = "both"
-                cmap = "twilight"
+                cmap = "copper_r"
             if search_type == "Mean over time period":
-                #vmin = math.ceil(input_lwr)
-                #vmax = math.floor(input_upr) 
-                vmin = input_lwr
-                vmax = input_upr 
+                vmin = math.ceil(input_lwr)
+                vmax = math.floor(input_upr) 
                 extend_type = "both"
-                cmap = "twilight"
+                cmap = "copper_r"
         
             return vmin, vmax, extend_type, cmap
     
@@ -1016,16 +1012,8 @@ def server(input, output, session):
         reader = Reader(shpfilename)
         australia_geom = [record.geometry for record in reader.records()
                           if record.attributes['NAME_LONG'] == 'Australia']
-        
-        states_shp = natural_earth(resolution='10m',category='cultural',name='admin_1_states_provinces')
-        states_reader = Reader(states_shp)
-        aus_states = [
-            rec.geometry for rec in states_reader.records()
-            if rec.attributes.get('admin') == 'Australia'
-            ]
 
-        ax.add_geometries(aus_states,crs=ccrs.PlateCarree(),edgecolor='black',facecolor='none',linewidth=0.5, zorder=3)
-        ax.add_geometries(australia_geom, crs=ccrs.PlateCarree(),edgecolor='black', facecolor='none', linewidth=0.8, zorder=4)
+        ax.add_geometries(australia_geom, crs=ccrs.PlateCarree(),edgecolor='black', facecolor='none', linewidth=0.5)
 
         ax.set_title(title, fontname='Arial', color='black', fontsize=12, loc="left", pad=20)
         ax.text(0, 0.99, subtitle, ha='left', va='bottom', transform=ax.transAxes,

@@ -87,6 +87,21 @@ modal_spatial = ui.modal(
         class_="w-100"),
     size = "xl"
 )
+modal_isoscape = ui.modal(
+    ui.markdown(
+        """These maps show the precipitation amount-weighted long-term (1962-2023) annual mean δ²H<sub>P</sub>, δ¹⁸O<sub>P</sub>, and <i>dxs</i><sub>P</sub>
+         values across the Australian continent.
+        <br><br> It is important to note that these are modelled values, not primary observations.
+        """
+    ),
+    title = "Long-term mean annual isoscapes",
+    easy_close = True,
+    footer = ui.div(ui.div(
+        ui.modal_button("Close window"),
+        class_="text-center"),
+        class_="w-100"),
+    size = "xl"
+)
 
 # DEFINE USER INTERFACE
 app_ui = ui.page_fluid(
@@ -131,13 +146,16 @@ app_ui = ui.page_fluid(
 
     ui.div(
         ui.markdown(
-            """This online calculator allows users to extract modelled monthly or annual precipitation isotope δ²H, δ¹⁸O, and <i>dxs</i> values 
+            """This online calculator allows users to extract modelled precipitation isotope δ²H, δ¹⁸O, and <i>dxs</i> values 
              for any location on the Australian continent, within the time period January 1962 to December 2023. 
-             <br><br>Below are two tabs for different data extraction types: timeseries or location search. On the `Extract timeseries` page you can enter a location (latitude and
-             longitude), choose a temporal resolution and optional date range, then view the precipitation isotope δ²H, δ¹⁸O, and <i>dxs</i> values for your chosen location. 
-             You will have the option to download the data to csv. On the 'Spatial search' page, you 
+             <br><br>The first two tabs below are for different data extraction types: timeseries or location search. On the `Extract timeseries` page 
+             you can enter a location (latitude and
+             longitude), choose a temporal resolution and optional date range, then view and download the precipitation isotope δ²H, δ¹⁸O, and <i>dxs</i> values 
+             for your chosen location. On the 'Spatial search' page, you 
              can enter a δ²H, δ¹⁸O, or <i>dxs</i> value as well as an optional expected offest from precipitation δ²H/δ¹⁸O/<i>dxs</i> and time period of interest. 
              You will then see a map of locations where that sample could have come from. 
+             <br><br>The third tab provides simple maps of long-term mean precipitation δ²H/δ¹⁸O/<i>dxs</i> values across the continent 
+             (equivalent to previously-published long-term mean isoscapes).
              <br><br>When choosing a tab, an information window will appear with further important details. To make the information window reappear, click the relevant tab. 
              <br><br>If using data from this online calculator, please cite 
              the <a href="https://egusphere.copernicus.org/preprints/2025/egusphere-2025-2458/" target="_blank">original publication</a>. Please also see the 
@@ -157,7 +175,7 @@ app_ui = ui.page_fluid(
     """
     ),
     
-    # top-level UI set-up: timeseries or spatial search?
+    # top-level UI set-up: timeseries or spatial search? or just the images of the long-term mean
     ui.page_navbar(
         # first panel: extract and plot timeseries
         ui.nav_panel("Extract timeseries",ui.layout_sidebar(
@@ -392,6 +410,62 @@ app_ui = ui.page_fluid(
                 col_widths=(12, 12)
             ),
         )),
+        ui.nav_panel("Long-term mean isoscapes", ui.layout_sidebar(
+            ui.sidebar(
+                ui.card(
+                    ui.card_header(
+                        ui.tags.h3("Inputs", style="font-weight: bold; font-size: 20px;")
+                        ),
+                        ui.input_radio_buttons("isotope_scape", "",
+                                        choices = {"d2H": "δ²H   ", "d18O": "δ¹⁸O   ", "dxs":"dxs   "},
+                                        selected = "d18O", inline=True
+                        ),
+                    ui.input_select("cmap_isoscape", "Colormap", 
+                                    choices = {"bone":"Blues", "viridis":"Viridis", "copper":"Copper"},
+                                    selected = "bone"
+                    )
+                ),
+                # card describing/linking to the original publication, disclaimer etc
+                ui.card(
+                    ui.card_header(
+                    ui.tags.h3("Dataset details", style="font-weight: bold; font-size: 20px;") 
+                    ),
+                    ui.markdown("""Please read the below-linked publication for all details as to how these precipitation 
+                                δ²H, δ¹⁸O, and <i>dxs</i> values 
+                                were produced. If you use data from this calculator, 
+                                please cite the paper below.
+                                """),
+                    ui.a("Go to publication", href="https://egusphere.copernicus.org/preprints/2025/egusphere-2025-2458/", target="_blank", class_="btn btn-secondary")
+                ),
+
+                # link to zenodo repo for users to download the netcdfs
+                ui.card(
+                    ui.card_header(
+                        ui.tags.h3("Download netcdf files", style="font-weight: bold; font-size: 20px;")
+                        ),
+                    ui.markdown(
+                        """<a href="https://doi.org/10.5281/zenodo.15486277" target="_blank">This Zenodo repository</a> holds netcdf files 
+                        with monthly precipitation isotope data across the Australian continent, at 0.25° spatial resolution. 
+                        The data are available at monthly and annual temporal resolution.
+                """
+                    )
+                ),
+                # match sidebar display features to the timeseries tab
+                width = 350,
+                open = "always",
+                ),
+            
+            ui.layout_columns(
+                ui.card(
+                    # card header
+                    ui.card_header("Long-term mean isoscapes",
+                                   style="text-align: center; font-size: 20px; font-weight: bold;"),
+                        ui.output_plot("plot_isoscapes"),style="margin-top: 0px; width: 100%"
+                    ),
+                col_widths=(12, 12)
+            ),
+
+        )),
     
     ),
     # define theme
@@ -414,6 +488,8 @@ def server(input, output, session):
             ui.modal_show(modal_ts)
         elif input.active_tab() == "Spatial search":
             ui.modal_show(modal_spatial)
+        elif input.active_tab() == "Long-term mean isoscapes":
+            ui.modal_show(modal_isoscape)
     
     # when the app is first opened, show info window for the timeseries
     @session.on_flush
@@ -439,6 +515,75 @@ def server(input, output, session):
             )
         )
 
+    def plot_isoscape_maps(fig, ax, dat, dat_proj, new_proj, title,vmin, vmax, cmap, cbar_lab):
+        im = dat.plot(ax=ax,transform=dat_proj,cmap=cmap,add_colorbar=False,vmin=vmin,vmax=vmax)
+
+        ax.set_extent([110, 155, -45, -10], crs=ccrs.PlateCarree())
+
+        # Australia outline
+        shpfilename = natural_earth(resolution="10m",category="cultural",name="admin_0_countries")
+        reader = Reader(shpfilename)
+        australia_geom = [
+            rec.geometry for rec in reader.records()
+            if rec.attributes["NAME_LONG"] == "Australia"
+        ]
+
+        states_shp = natural_earth(resolution='10m',category='cultural',name='admin_1_states_provinces')
+        states_reader = Reader(states_shp)
+        aus_states = [
+            rec.geometry for rec in states_reader.records()
+            if rec.attributes.get('admin') == 'Australia'
+        ]
+
+        ax.add_geometries(aus_states,crs=ccrs.PlateCarree(),edgecolor='black',facecolor='none',linewidth=0.5, zorder=3)
+        ax.add_geometries(australia_geom, crs=ccrs.PlateCarree(),edgecolor='black', facecolor='none', linewidth=0.8, zorder=4)
+
+        #ax.set_title(title, fontsize=14)
+
+        ax.axis("off")
+
+        cbar = fig.colorbar(im,ax=ax,orientation="vertical",shrink=0.4,pad=0.02, extend = "both")
+        cbar.set_label(cbar_lab, fontsize=11)
+
+        return im
+
+    # the easy one (just show long-term mean maps; not reactive in any way)
+    @output
+    @render.plot
+    def plot_isoscapes():
+
+        which_iso = input.isotope_scape()
+        this_cmap = input.cmap_isoscape()
+
+        if which_iso == "d18O":
+            da, vmin, vmax, lab = (d18O_mean.d18Op, -7, -3, "δ¹⁸O (‰ VSMOW)")
+            title = r"Long-term mean $\delta^{18}\mathrm{O}_{\mathrm{p}}$ isoscape (1962–2023)"
+
+        elif which_iso == "d2H":
+            da, vmin, vmax, lab = (d2H_mean.d2Hp, -45, -5, "δ²H (‰ VSMOW)")
+            title = r"Long-term mean $\delta^{2}\mathrm{H}_{\mathrm{p}}$ isoscape (1962–2023)"
+
+        elif which_iso == "dxs":
+            da, vmin, vmax, lab = (dxs_mean.dxsp, 5, 16, r"$\mathit{dxs}$")
+            title = r"Long-term mean annual $\mathit{dxs}$ isoscape (1962–2023)"
+
+        mpl.rcParams['font.family'] = 'Arial'
+        mpl.rcParams['text.color'] = 'black'
+        mpl.rcParams['axes.labelcolor'] = 'black'
+        mpl.rcParams['xtick.color'] = 'black'
+        mpl.rcParams['ytick.color'] = 'black'
+
+        dat_proj = new_proj = ccrs.PlateCarree()
+
+        fig, ax = plt.subplots(figsize=(10, 7),subplot_kw={"projection": ccrs.PlateCarree()})
+
+        plot_isoscape_maps(fig, ax, da, dat_proj, new_proj, "",vmin, vmax, cmap=this_cmap, cbar_lab=lab)
+
+
+        fig.suptitle(title, fontsize=14, y=0.98)
+        fig.tight_layout()
+        return fig
+    
     # TIMESERIES: function to get data at selected point
     def extract_timeseries(lat, lon):
         # extract relevant timeseries
@@ -947,11 +1092,11 @@ def server(input, output, session):
             months_str = ", ".join(str(m) for m in months)
 
             if search_type == "Long-term mean":
-                title = f"Locations where precipitation {system_str} is between {input_lwr}‰ and {input_upr}‰ in the long-term annual mean"
+                title = f"Locations where precipitation {system_str} is between {input_lwr:.2f}‰ and {input_upr:.2f}‰ in the long-term annual mean"
                 subtitle = f"{year_start} to {year_end}"
                 label = f"Precipitation {system_str} (‰VSMOW)" 
             else:
-                title = f"Locations where precipitation {system_str} is between {input_lwr}‰ and {input_upr}‰ in the long-term mean"
+                title = f"Locations where precipitation {system_str} is between {input_lwr:.2f}‰ and {input_upr:.2f}‰ in the long-term mean"
                 subtitle = f"{year_start} to {year_end}, including months {months_str}"
                 label = f"Precipitation {system_str} (‰VSMOW)"
 

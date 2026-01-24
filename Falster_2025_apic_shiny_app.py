@@ -158,7 +158,7 @@ app_ui = ui.page_fluid(
              (equivalent to previously-published long-term mean isoscapes).
              <br><br>When choosing a tab, an information window will appear with further important details. To make the information window reappear, click the relevant tab. 
              <br><br>If using data from this online calculator, please cite 
-             the <a href="https://egusphere.copernicus.org/preprints/2025/egusphere-2025-2458/" target="_blank">original publication</a>. Please also see the 
+             the <a href="https://hess.copernicus.org/articles/30/289/2026/hess-30-289-2026.html" target="_blank">original publication</a>. Please also see the 
              publication for all details of how the precipitation isotope values were calculated. It is important to note 
              that these are modelled values, not primary observations. If you encounter problems with this web app, please get in touch with Georgy Falster.  
             """
@@ -244,7 +244,7 @@ app_ui = ui.page_fluid(
                                 were produced. If you use data from this calculator, 
                                 please cite the paper below.
                                 """),
-                    ui.a("Go to publication", href="https://egusphere.copernicus.org/preprints/2025/egusphere-2025-2458/", target="_blank", class_="btn btn-secondary")
+                    ui.a("Go to publication", href="https://hess.copernicus.org/articles/30/289/2026/hess-30-289-2026.html", target="_blank", class_="btn btn-secondary")
                 ),
 
                 # link to zenodo repo for users to download the netcdfs
@@ -378,7 +378,7 @@ app_ui = ui.page_fluid(
                                 were produced. If you use data from this calculator, 
                                 please cite the paper below.
                                 """),
-                    ui.a("Go to publication", href="https://egusphere.copernicus.org/preprints/2025/egusphere-2025-2458/", target="_blank", class_="btn btn-secondary")
+                    ui.a("Go to publication", href="https://hess.copernicus.org/articles/30/289/2026/hess-30-289-2026.html", target="_blank", class_="btn btn-secondary")
                 ),
 
                 # link to zenodo repo for users to download the netcdfs
@@ -435,7 +435,7 @@ app_ui = ui.page_fluid(
                                 were produced. If you use data from this calculator, 
                                 please cite the paper below.
                                 """),
-                    ui.a("Go to publication", href="https://egusphere.copernicus.org/preprints/2025/egusphere-2025-2458/", target="_blank", class_="btn btn-secondary")
+                    ui.a("Go to publication", href="https://hess.copernicus.org/articles/30/289/2026/hess-30-289-2026.html", target="_blank", class_="btn btn-secondary")
                 ),
 
                 # link to zenodo repo for users to download the netcdfs
